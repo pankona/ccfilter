@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 // Message はClaude CLIが出力するJSONメッセージの基本構造
 type Message struct {
 	Type string `json:"type"`
@@ -31,8 +33,9 @@ type Content struct {
 	Text string `json:"text,omitempty"`
 
 	// tool_use タイプの場合
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID    string          `json:"id,omitempty"`
+	Name  string          `json:"name,omitempty"`
+	Input json.RawMessage `json:"input,omitempty"`
 }
 
 // UserMessage はuserタイプのメッセージ (tool_result)
