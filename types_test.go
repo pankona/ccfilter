@@ -214,3 +214,119 @@ func TestParseAssistantMessage_ToolUse(t *testing.T) {
 		})
 	}
 }
+
+// TestParseUserMessage_ToolResult はuserメッセージ(tool_result)を正しくパースできることを確認する
+func TestParseUserMessage_ToolResult(t *testing.T) {
+	tests := []struct {
+		name          string
+		input         string
+		wantType      string
+		wantContent   string
+		wantIsError   bool
+		wantErr       bool
+	}{
+		{
+			name:        "successful tool result",
+			input:       `{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_xxx","content":"No files found","is_error":false}]}}`,
+			wantType:    "user",
+			wantContent: "No files found",
+			wantIsError: false,
+			wantErr:     false,
+		},
+		{
+			name:        "error tool result",
+			input:       `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_yyy","content":"permission denied","is_error":true}]}}`,
+			wantType:    "user",
+			wantContent: "permission denied",
+			wantIsError: true,
+			wantErr:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var msg UserMessage
+			err := json.Unmarshal([]byte(tt.input), &msg)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("json.Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err == nil {
+				if msg.Type != tt.wantType {
+					t.Errorf("UserMessage.Type = %v, want %v", msg.Type, tt.wantType)
+				}
+				if len(msg.Message.Content) == 0 {
+					t.Errorf("UserMessage.Message.Content is empty")
+					return
+				}
+				if msg.Message.Content[0].Content != tt.wantContent {
+					t.Errorf("ToolResult.Content = %v, want %v", msg.Message.Content[0].Content, tt.wantContent)
+				}
+				if msg.Message.Content[0].IsError != tt.wantIsError {
+					t.Errorf("ToolResult.IsError = %v, want %v", msg.Message.Content[0].IsError, tt.wantIsError)
+				}
+			}
+		})
+	}
+}
+
+// TestParseResultMessage はresultメッセージを正しくパースできることを確認する
+func TestParseResultMessage(t *testing.T) {
+	tests := []struct {
+		name         string
+		input        string
+		wantSubtype  string
+		wantCost     float64
+		wantDuration int
+		wantTurns    int
+		wantErr      bool
+	}{
+		{
+			name:         "success result",
+			input:        `{"type":"result","subtype":"success","is_error":false,"result":"完了しました","duration_ms":1000,"total_cost_usd":0.01,"num_turns":1}`,
+			wantSubtype:  "success",
+			wantCost:     0.01,
+			wantDuration: 1000,
+			wantTurns:    1,
+			wantErr:      false,
+		},
+		{
+			name:         "error result",
+			input:        `{"type":"result","subtype":"error","is_error":true,"result":"エラーが発生しました","duration_ms":500,"total_cost_usd":0.005,"num_turns":1}`,
+			wantSubtype:  "error",
+			wantCost:     0.005,
+			wantDuration: 500,
+			wantTurns:    1,
+			wantErr:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var msg ResultMessage
+			err := json.Unmarshal([]byte(tt.input), &msg)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("json.Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err == nil {
+				if msg.Subtype != tt.wantSubtype {
+					t.Errorf("ResultMessage.Subtype = %v, want %v", msg.Subtype, tt.wantSubtype)
+				}
+				if msg.TotalCostUsd != tt.wantCost {
+					t.Errorf("ResultMessage.TotalCostUsd = %v, want %v", msg.TotalCostUsd, tt.wantCost)
+				}
+				if msg.DurationMs != tt.wantDuration {
+					t.Errorf("ResultMessage.DurationMs = %v, want %v", msg.DurationMs, tt.wantDuration)
+				}
+				if msg.NumTurns != tt.wantTurns {
+					t.Errorf("ResultMessage.NumTurns = %v, want %v", msg.NumTurns, tt.wantTurns)
+				}
+			}
+		})
+	}
+}

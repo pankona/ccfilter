@@ -34,3 +34,32 @@ type Content struct {
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 }
+
+// UserMessage はuserタイプのメッセージ (tool_result)
+type UserMessage struct {
+	Type    string `json:"type"`
+	Message struct {
+		Role    string       `json:"role"`
+		Content []ToolResult `json:"content"`
+	} `json:"message"`
+}
+
+// ToolResult はツール実行結果
+type ToolResult struct {
+	Type      string `json:"type"`
+	ToolUseID string `json:"tool_use_id"`
+	Content   string `json:"content"`
+	IsError   bool   `json:"is_error,omitempty"`
+}
+
+// ResultMessage はresultタイプのメッセージ (最終結果とメトリクス)
+type ResultMessage struct {
+	Type         string  `json:"type"`
+	Subtype      string  `json:"subtype"`
+	IsError      bool    `json:"is_error"`
+	Result       string  `json:"result"`
+	DurationMs   int     `json:"duration_ms"`
+	TotalCostUsd float64 `json:"total_cost_usd"`
+	NumTurns     int     `json:"num_turns"`
+	SessionID    string  `json:"session_id"`
+}
