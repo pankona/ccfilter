@@ -15,19 +15,19 @@ func TestFormatAssistantMessage_Text(t *testing.T) {
 		{
 			name:   "simple text",
 			input:  `{"type":"assistant","message":{"content":[{"type":"text","text":"Hello, World!"}]}}`,
-			config: FilterConfig{ShowAssistant: true},
+			config: FilterConfig{ShowAssistant: true, UseColor: false},
 			want:   "Hello, World!\n",
 		},
 		{
 			name:   "multiline text",
 			input:  `{"type":"assistant","message":{"content":[{"type":"text","text":"Line 1\nLine 2\nLine 3"}]}}`,
-			config: FilterConfig{ShowAssistant: true},
+			config: FilterConfig{ShowAssistant: true, UseColor: false},
 			want:   "Line 1\nLine 2\nLine 3\n",
 		},
 		{
 			name:   "japanese text",
 			input:  `{"type":"assistant","message":{"content":[{"type":"text","text":"こんにちは、世界！"}]}}`,
-			config: FilterConfig{ShowAssistant: true},
+			config: FilterConfig{ShowAssistant: true, UseColor: false},
 			want:   "こんにちは、世界！\n",
 		},
 	}
@@ -56,7 +56,7 @@ func TestFormatResultMessage(t *testing.T) {
 		{
 			name:   "success with standard config",
 			input:  `{"type":"result","subtype":"success","result":"完了しました","duration_ms":5000,"total_cost_usd":0.0123,"num_turns":3}`,
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want: []string{
 				"━━━",
 				"完了しました",
@@ -68,7 +68,7 @@ func TestFormatResultMessage(t *testing.T) {
 		{
 			name:   "minimal config",
 			input:  `{"type":"result","subtype":"success","result":"完了しました","duration_ms":5000,"total_cost_usd":0.0123,"num_turns":3}`,
-			config: FilterConfig{InfoLevel: "minimal"},
+			config: FilterConfig{InfoLevel: "minimal", UseColor: false},
 			want: []string{
 				"完了しました",
 			},
@@ -105,7 +105,7 @@ func TestFormatToolUse(t *testing.T) {
 				Name:  "Glob",
 				Input: []byte(`{"pattern":"**/*.go"}`),
 			},
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want:   "→ Glob: pattern=\"**/*.go\"\n",
 		},
 		{
@@ -115,7 +115,7 @@ func TestFormatToolUse(t *testing.T) {
 				Name:  "Bash",
 				Input: []byte(`{"command":"ls -la"}`),
 			},
-			config: FilterConfig{InfoLevel: "minimal"},
+			config: FilterConfig{InfoLevel: "minimal", UseColor: false},
 			want:   "→ Bash\n",
 		},
 		{
@@ -125,7 +125,7 @@ func TestFormatToolUse(t *testing.T) {
 				Name:  "Read",
 				Input: []byte(`{"file_path":"/path/to/file.txt"}`),
 			},
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want:   "→ Read: file_path=\"/path/to/file.txt\"\n",
 		},
 		{
@@ -135,7 +135,7 @@ func TestFormatToolUse(t *testing.T) {
 				Name:  "Write",
 				Input: []byte(`{"file_path":"/path/to/file.txt","content":"data"}`),
 			},
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want:   "→ Write: file_path=\"/path/to/file.txt\"\n",
 		},
 		{
@@ -145,7 +145,7 @@ func TestFormatToolUse(t *testing.T) {
 				Name:  "Grep",
 				Input: []byte(`{"pattern":"func.*Test"}`),
 			},
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want:   "→ Grep: pattern=\"func.*Test\"\n",
 		},
 		{
@@ -155,7 +155,7 @@ func TestFormatToolUse(t *testing.T) {
 				Name:  "UnknownTool",
 				Input: []byte(`{}`),
 			},
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want:   "→ UnknownTool\n",
 		},
 	}
@@ -229,7 +229,7 @@ func TestFormatUserMessage_ToolResult(t *testing.T) {
 		{
 			name:   "successful tool result",
 			input:  `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","content":"Success: file found"}]}}`,
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want: []string{
 				"← Success: file found",
 			},
@@ -237,7 +237,7 @@ func TestFormatUserMessage_ToolResult(t *testing.T) {
 		{
 			name:   "error tool result",
 			input:  `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","is_error":true,"content":"Error: permission denied"}]}}`,
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want: []string{
 				"← Error:",
 				"Error: permission denied",
@@ -246,7 +246,7 @@ func TestFormatUserMessage_ToolResult(t *testing.T) {
 		{
 			name:   "minimal mode",
 			input:  `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","content":"Line1\nLine2\nLine3\nLine4"}]}}`,
-			config: FilterConfig{InfoLevel: "minimal"},
+			config: FilterConfig{InfoLevel: "minimal", UseColor: false},
 			want: []string{
 				"← Line1",
 			},
@@ -254,7 +254,7 @@ func TestFormatUserMessage_ToolResult(t *testing.T) {
 		{
 			name:   "long output truncated in standard mode",
 			input:  `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","content":"Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7"}]}}`,
-			config: FilterConfig{InfoLevel: "standard"},
+			config: FilterConfig{InfoLevel: "standard", UseColor: false},
 			want: []string{
 				"← Line1",
 				"Line5",
@@ -264,7 +264,7 @@ func TestFormatUserMessage_ToolResult(t *testing.T) {
 		{
 			name:   "verbose mode shows all",
 			input:  `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","content":"Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7"}]}}`,
-			config: FilterConfig{InfoLevel: "verbose"},
+			config: FilterConfig{InfoLevel: "verbose", UseColor: false},
 			want: []string{
 				"← Line1",
 				"Line7",

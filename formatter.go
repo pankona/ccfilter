@@ -68,8 +68,12 @@ func formatUserMessage(data []byte, config *FilterConfig) (string, error) {
 func formatToolUse(content Content, config *FilterConfig) string {
 	var output strings.Builder
 
-	output.WriteString("→ ")
-	output.WriteString(content.Name)
+	arrow := colorize("→", "cyan", config.UseColor)
+	output.WriteString(arrow)
+	output.WriteString(" ")
+
+	toolName := colorize(content.Name, "blue", config.UseColor)
+	output.WriteString(toolName)
 
 	// minimal モードではツール名のみ
 	if config.InfoLevel == "minimal" {
@@ -128,10 +132,14 @@ func extractMainParams(toolName string, input []byte) string {
 func formatToolResult(result ToolResult, config *FilterConfig) string {
 	var output strings.Builder
 
-	output.WriteString("← ")
+	arrow := colorize("←", "cyan", config.UseColor)
+	output.WriteString(arrow)
+	output.WriteString(" ")
 
 	if result.IsError {
-		output.WriteString("Error: ")
+		errorText := colorize("Error:", "red", config.UseColor)
+		output.WriteString(errorText)
+		output.WriteString(" ")
 	}
 
 	// minimal モードでは1行のみ
@@ -185,8 +193,10 @@ func formatResultMessage(data []byte, config *FilterConfig) (string, error) {
 
 	// 区切り線
 	separator := strings.Repeat("━", 40)
+	coloredSeparator := colorize(separator, "gray", config.UseColor)
+
 	output.WriteString("\n")
-	output.WriteString(separator)
+	output.WriteString(coloredSeparator)
 	output.WriteString("\n")
 
 	// 結果
@@ -197,10 +207,12 @@ func formatResultMessage(data []byte, config *FilterConfig) (string, error) {
 	if config.InfoLevel != "minimal" {
 		output.WriteString("\n")
 		metrics := formatMetrics(msg, config)
-		output.WriteString(metrics)
+		coloredMetrics := colorize(metrics, "gray", config.UseColor)
+		output.WriteString(coloredMetrics)
+		output.WriteString("\n")
 	}
 
-	output.WriteString(separator)
+	output.WriteString(coloredSeparator)
 	output.WriteString("\n")
 
 	return output.String(), nil
